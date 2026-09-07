@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import get_current_user
 from app.db.session import get_db
-from app.schemas.token import TokenPair, RefreshRequest, LogoutRequest
+from app.schemas.token import LogoutRequest, RefreshRequest, TokenPair
 from app.schemas.user import UserCreate, UserRead
 from app.services import auth as auth_service
-from app.api.deps import get_current_user
-from app.models.user import User
 
 router = APIRouter()
+
 
 @router.post("/register", response_model=UserRead, status_code=201)
 async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
@@ -16,6 +16,7 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     if user:
         raise HTTPException(status_code=400, detail="Email already registered")
     return await auth_service.create_user(db, user_data)
+
 
 @router.post("/login", response_model=TokenPair)
 async def login(
@@ -32,6 +33,7 @@ async def login(
     access_token, refresh_token, _ = await auth_service.create_token_pair(user)
     return {"access_token": access_token, "refresh_token": refresh_token}
 
+
 @router.post("/refresh", response_model=TokenPair)
 async def refresh_token(data: RefreshRequest):
     result = await auth_service.refresh_access_token(data.refresh_token)
@@ -42,6 +44,7 @@ async def refresh_token(data: RefreshRequest):
         )
     access_token, new_refresh_token, _ = result
     return {"access_token": access_token, "refresh_token": new_refresh_token}
+
 
 @router.post("/logout")
 async def logout(data: LogoutRequest):

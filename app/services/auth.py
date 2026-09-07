@@ -12,7 +12,7 @@ from app.core.security import (
     create_refresh_token,
     decode_token,
 )
-from app.models.user import User
+from app.models import User
 from app.schemas.user import UserCreate
 from app.db.redis import redis_client
 from app.core.config import settings
@@ -39,7 +39,7 @@ async def create_token_pair(user: User) -> tuple[str, str, str]:
     access_token = create_access_token(user.id)
     refresh_token, jti = create_refresh_token(user.id)
     # Сохраняем refresh token в Redis
-    expire_seconds = settings.refresh_token_expire_days * 24 * 3600
+    expire_seconds = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600
     await redis_client.setex(
         f"refresh_token:{jti}",
         expire_seconds,
@@ -67,7 +67,7 @@ async def refresh_access_token(refresh_token: str) -> Optional[tuple[str, str, s
     user_id = int(payload["sub"])
     access_token = create_access_token(user_id)
     new_refresh_token, new_jti = create_refresh_token(user_id)
-    expire_seconds = settings.refresh_token_expire_days * 24 * 3600
+    expire_seconds = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600
     await redis_client.setex(
         f"refresh_token:{new_jti}",
         expire_seconds,

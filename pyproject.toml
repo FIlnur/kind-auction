@@ -17,6 +17,7 @@ dependencies = [
     "pillow>=12.3.0",
     "psycopg[binary]>=3.3.4",
     "pydantic-settings>=2.15.0",
+    "pydantic[email]>=2.13.5",
     "python-jose>=3.5.0",
     "python-multipart>=0.0.32",
     "redis>=8.1.0",
